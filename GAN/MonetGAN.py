@@ -26,9 +26,11 @@ class MonetGAN:
         # Instantiate models
         self.generator = Generator(self. monets, self.photos, self.image_shape)
         self.generator.build()
+        self.generator.model.compile(loss='binary_crossentropy')
 
         self.discriminator = Discriminator(self. monets, self.photos, self.image_shape)
         self.discriminator.build()
+        self.discriminator.model.compile(loss='binary_crossentropy')
 
     # Function to load the nth monet painting (cycles if n >= len(monets))
     def load_monet(self, index):
@@ -54,6 +56,9 @@ class MonetGAN:
     # 4) Back-propagate and repeat until we've gone through all the "steps" (parameter)
     def train(self, steps, batch_size=32):
 
+        valid = np.ones(batch_size)
+        fake = np.zeors(batch_size)
+
         # Training loop
         for step in range(steps):
 
@@ -63,13 +68,16 @@ class MonetGAN:
             num_real_images = batch_size - num_fake_images
 
             # Create the training batch
-            discriminator_train = []
+            discriminator_train, generator_train = [], []
             truth_tracker = []
 
             # Fake images = generated images, truth value is 0
             for n in range(num_fake_images):
+
                 photo = self.load_photo(np.random.choice(self.photos))
-                discriminator_train.append(self.generator.generate(photo))
+                generator_train.append(photo)
+
+                discriminator_train.append(self.generator.model.generate(photo))
                 truth_tracker.append(0)
 
             # Real images = Monet images, truth value is 1
@@ -84,6 +92,11 @@ class MonetGAN:
             discriminator_train = list(discriminator_train)
             truth_tracker = list(truth_tracker)
 
+            # Train discriminator
+            d_loss = self.discriminator.model.train_on_batch(discriminator_train, truth_tracker)
+            g_loss = self.generator.model.train_on_batch(generator_train, valid)
+
+            print("%d [D loss: %f] [G loss: %f]" % (step, 100 * d_loss, g_loss))
 
 
 

@@ -34,12 +34,7 @@ class Discriminator:
         # Output
         model.add(layers.Conv2D(1, 4))
 
-        self.model
+        self.model = model
         return model
-
-    def discriminator_loss(self, y_true, y_pred):
-        loss = keras.backend.square(y_true-y_pred)  # (batch_size, 1)
-        loss = keras.backend.sum(loss, axis=1)  # (batch_size,)
-        return loss
 
 
