@@ -63,6 +63,9 @@ class Generator:
 
         return model
 
+    def generate(self, photo):
+        pass
+
     def generator_loss(self, y_true, y_pred):
         loss = keras.backend.square(y_true - y_pred)  # (batch_size, 1)
         loss = keras.backend.sum(loss, axis=1)  # (batch_size,)
