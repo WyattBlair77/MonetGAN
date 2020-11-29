@@ -1,8 +1,5 @@
 import sys
-sys.path.append('./Our GAN/')
-
-import tensorflow as tf
-import os
+sys.path.append('./GAN/')
 from MonetGAN import MonetGAN
 
 print("VERSION:", tf.__version__)
@@ -13,9 +10,9 @@ in the monet_images list as training data. You can sample some of the images bel
 looks like.
 '''
 
-monet_dataset = [tf.data.TFRecordDataset('./monet_tfrec/'+f) for f in os.listdir('./monet_tfrec/')]
-photo_dataset = [tf.data.TFRecordDataset('./photo_tfrec/'+f) for f in os.listdir('./photo_tfrec/')]
-
+monet_path = './dataset/monet_jpg/'
+photo_path = './dataset/photo_jpg/'
 image_shape = (256, 256, 3)
 
-MonetGAN = MonetGAN(monet_dataset, photo_dataset, image_shape)
+GAN = MonetGAN(monet_path, photo_path, image_shape)
+GAN.train(steps=10, batch_size=2)

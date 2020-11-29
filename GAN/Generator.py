@@ -1,5 +1,3 @@
-import tensorflow as tf
-import tensorflow_addons as tfa
 import keras
 from tensorflow.keras import layers
 

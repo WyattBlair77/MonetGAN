@@ -4,9 +4,9 @@ print("VERSION:", tf.__version__)
 from Discriminator import Discriminator
 from Generator import Generator
 import numpy as np
-import glob
 import math
-import cv2
+import glob
+import cv2 as cv2
 
 
 class MonetGAN:
