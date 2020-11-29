@@ -3,6 +3,8 @@ from tensorflow.keras import layers
 
 class Discriminator:
     def __init__(self, monet_ds, photo_ds, image_shape):
+        self.model = None
+
         self.monet_ds = monet_ds
         self.photo_ds = photo_ds
         self.image_shape = image_shape
@@ -32,6 +34,7 @@ class Discriminator:
         # Output
         model.add(layers.Conv2D(1, 4))
 
+        self.model
         return model
 
     def discriminator_loss(self, y_true, y_pred):
