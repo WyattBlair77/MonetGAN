@@ -12,6 +12,7 @@ import cv2
 class MonetGAN:
     def __init__(self, monet_path, photo_path, image_shape):
 
+        # Load Datasets
         self.monet_path = monet_path
         self.photo_path = photo_path
         self.monets = glob.glob(self.monet_path)
@@ -19,11 +20,17 @@ class MonetGAN:
         self.num_monets = len(self.monets)
         self.num_photos = len(self.photos)
 
+        # Data shape
         self.image_shape = image_shape
 
-        self.generator = Generator(self. monets, self.photos, self.image_shape).build()
-        self.discriminator = Discriminator(self. monets, self.photos, self.image_shape).build()
+        # Instantiate models
+        self.generator = Generator(self. monets, self.photos, self.image_shape)
+        self.generator.build()
 
+        self.discriminator = Discriminator(self. monets, self.photos, self.image_shape)
+        self.discriminator.build()
+
+    # Function to load the nth monet painting (cycles if n >= len(monets))
     def load_monet(self, index):
         if index >= self.num_monets:
             index = index % self.num_monets
@@ -31,6 +38,7 @@ class MonetGAN:
         monet = cv2.imread(self.monets[index])
         return monet
 
+    # Function to load the nth photo (cycles if n >= len(photos))
     def load_photo(self, index):
         if index >= self.num_photos:
             index = index % self.num_photos
@@ -38,8 +46,15 @@ class MonetGAN:
         photo = cv2.imread(self.photos[index])
         return photo
 
+    # THE training loop:
+    # 1) Create batch of training data for the discriminator including some generated images
+    # 2) Have the discriminator assess the batch and return its scores
+    # 3) Grade the discriminator on how well it identified Monets and grade the Generator on how well it tricked the
+    #    discriminator
+    # 4) Back-propagate and repeat until we've gone through all the "steps" (parameter)
     def train(self, steps, batch_size=32):
 
+        # Training loop
         for step in range(steps):
 
             # Determine proportion of batch that will be real vs. fake and from where in Monets we will sample

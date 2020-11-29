@@ -7,6 +7,8 @@ from tensorflow.keras import layers
 class Generator:
     def __init__(self, monet_ds, photo_ds, image_shape):
 
+        self.model = None
+
         self.monet_ds = monet_ds
         self.photo_ds = photo_ds
         self.image_shape = image_shape
@@ -61,6 +63,7 @@ class Generator:
         # Output layer
         model.add(layers.Conv2DTranspose(self.OUTPUT_CHANNELS, activation='tanh'))
 
+        self.model = model
         return model
 
     def generate(self, photo):
