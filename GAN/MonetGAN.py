@@ -6,6 +6,7 @@ from Generator import Generator
 import numpy as np
 import math
 import glob
+import os
 import cv2 as cv2
 from PIL import Image
 
@@ -33,6 +34,13 @@ class MonetGAN:
         self.discriminator.build()
         self.discriminator.model.compile(loss='binary_crossentropy')
 
+    def save_model(self, model_name):
+        path = '../SavedModels/'+model_name+'/'
+
+        os.mkdir(path)
+        self.generator.model.save_weights(path+'generator')
+        self.discriminator.model.save_weights(path+'discriminator')
+
     def display_image(self, image, save=False, save_path='./SavedOutput/img.png'):
         img = Image.fromarray(image)
         if save:
@@ -44,7 +52,7 @@ class MonetGAN:
         if index >= self.num_monets:
             index = index % self.num_monets
 
-        monet = np.asarray(Image.open(self.monets[index]))
+        monet = np.asarray(Image.open(self.monets[index]), dtype='float32')
         return monet
 
     # Function to load the nth photo (cycles if n >= len(photos))
@@ -52,7 +60,7 @@ class MonetGAN:
         if index >= self.num_photos:
             index = index % self.num_photos
 
-        photo = np.asarray(Image.open(self.photos[index]))
+        photo = np.asarray(Image.open(self.photos[index]), dtype='float32')
         return photo
 
     # THE training loop:
@@ -69,7 +77,7 @@ class MonetGAN:
         for step in range(steps):
 
             # Determine proportion of batch that will be real vs. fake and from where in Monets we will sample
-            index = np.random.randint(0, self.num_monets, batch_size)
+            index = np.random.randint(0, self.num_monets)
             num_fake_images = math.floor(np.random.random()*batch_size)
             num_real_images = batch_size - num_fake_images
 
@@ -80,15 +88,15 @@ class MonetGAN:
             # Fake images = generated images, truth value is 0
             for n in range(num_fake_images):
 
-                photo = self.load_photo(np.random.choice(self.photos))
+                photo = self.load_photo(index+n)
                 generator_train.append(photo)
 
-                discriminator_train.append(self.generator.model.generate(photo))
+                discriminator_train.append(self.generator.generate(photo))
                 truth_tracker.append(0)
 
             # Real images = Monet images, truth value is 1
             for n in range(num_real_images):
-                discriminator_train.append(self.load_monet(self.monets[index+n]))
+                discriminator_train.append(self.load_monet(index+n))
                 truth_tracker.append(1)
 
             # Shuffle the batch

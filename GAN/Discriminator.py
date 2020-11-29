@@ -15,7 +15,7 @@ class Discriminator:
     # slowly converting it into just a single neuron. So we'll down-sample the 256x256x3 image until it is a single
     # neuron, capable of telling us whether we're looking at a Monet or not
     def build(self):
-        model = tf.keras.Sequential()
+        model = tf.keras.Sequential(name='Discriminator')
 
         # Input layer
         model.add(layers.Input(shape=self.image_shape, name='photo_input'))

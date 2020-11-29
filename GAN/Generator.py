@@ -17,7 +17,7 @@ class Generator:
     # The generator should look like two funnels stuck together at their tips. Going to down-sample and then up-sample
     # to achieve this.
     def build(self):
-        model = tf.keras.Sequential()
+        model = tf.keras.Sequential(name='Generator')
 
         # Input layer
         model.add(layers.Input(shape=self.image_shape))
@@ -67,11 +67,12 @@ class Generator:
 
         self.model = model
 
-    def generate(self, photo):
+    def generate(self, photo, num_predictions=1):
 
         if self.model is None:
             raise ValueError('The model has not been built yet. Use Generator.build() '
                              'before using Generator.generate().')
 
-        return self.model.predict(photo)
+        photo = photo.reshape(num_predictions, self.image_shape[0], self.image_shape[1], self.image_shape[2])
+        return self.model(photo, training=False).numpy().squeeze()
 
