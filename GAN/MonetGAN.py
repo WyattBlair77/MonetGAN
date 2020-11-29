@@ -7,6 +7,7 @@ import numpy as np
 import math
 import glob
 import cv2 as cv2
+from PIL import Image
 
 
 class MonetGAN:
@@ -32,12 +33,18 @@ class MonetGAN:
         self.discriminator.build()
         self.discriminator.model.compile(loss='binary_crossentropy')
 
+    def display_image(self, image, save=False, save_path='./SavedOutput/img.png'):
+        img = Image.fromarray(image)
+        if save:
+            img.save(save_path)
+        img.show()
+
     # Function to load the nth monet painting (cycles if n >= len(monets))
     def load_monet(self, index):
         if index >= self.num_monets:
             index = index % self.num_monets
 
-        monet = cv2.imread(self.monets[index])
+        monet = np.asarray(Image.open(self.monets[index]))
         return monet
 
     # Function to load the nth photo (cycles if n >= len(photos))
@@ -45,7 +52,7 @@ class MonetGAN:
         if index >= self.num_photos:
             index = index % self.num_photos
 
-        photo = cv2.imread(self.photos[index])
+        photo = np.asarray(Image.open(self.photos[index]))
         return photo
 
     # THE training loop:
@@ -57,7 +64,6 @@ class MonetGAN:
     def train(self, steps, batch_size=32):
 
         valid = np.ones(batch_size)
-        fake = np.zeors(batch_size)
 
         # Training loop
         for step in range(steps):

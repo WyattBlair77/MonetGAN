@@ -1,4 +1,5 @@
-import keras
+import tensorflow as tf
+from keras.models import Sequential, Model
 from tensorflow.keras import layers
 
 
@@ -16,7 +17,7 @@ class Generator:
     # The generator should look like two funnels stuck together at their tips. Going to down-sample and then up-sample
     # to achieve this.
     def build(self):
-        model = keras.models.Sequential()
+        model = tf.keras.Sequential()
 
         # Input layer
         model.add(layers.Input(shape=self.image_shape))
@@ -41,13 +42,13 @@ class Generator:
 
         # Up-sampling
         model.add(layers.Conv2DTranspose(512, 4))
-        model.add(layers.dropout(0.5))
+        model.add(layers.Dropout(0.5))
         model.add(layers.LeakyReLU())
         model.add(layers.Conv2DTranspose(512, 4))
-        model.add(layers.dropout(0.5))
+        model.add(layers.Dropout(0.5))
         model.add(layers.LeakyReLU())
         model.add(layers.Conv2DTranspose(512, 4))
-        model.add(layers.dropout(0.5))
+        model.add(layers.Dropout(0.5))
         model.add(layers.LeakyReLU())
         model.add(layers.Conv2DTranspose(512, 4))
         model.add(layers.LeakyReLU())
@@ -59,10 +60,12 @@ class Generator:
         model.add(layers.LeakyReLU())
 
         # Output layer
-        model.add(layers.Conv2DTranspose(self.OUTPUT_CHANNELS, activation='tanh'))
+        model.add(layers.Conv2DTranspose(self.OUTPUT_CHANNELS, kernel_size=1, activation='tanh'))
+
+        model.build(input_shape=self.image_shape)
+        model.summary()
 
         self.model = model
-        return model
 
     def generate(self, photo):
 
