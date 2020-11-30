@@ -10,14 +10,17 @@ looks like.
 
 monet_path = './dataset/monet_jpg/*.jpg'
 photo_path = './dataset/photo_jpg/*.jpg'
-image_shape = (256, 256, 3, )
+image_shape = (256, 256, 3)
 
-GAN = MonetGAN(monet_path, photo_path, image_shape)
+GAN = MonetGAN(monet_path, photo_path, image_shape, batch_size=1)
 
 # example_monet = GAN.load_monet(index=0)
 example_photo = GAN.load_photo(index=0)
-
 generated_image = GAN.generator.generate(example_photo)
+print(generated_image)
+print(generated_image.shape)
+print(type(generated_image))
+
 GAN.display_image(generated_image, save=True)
 
 # GAN.display_image(example_monet)

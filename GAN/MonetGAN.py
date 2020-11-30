@@ -7,12 +7,12 @@ import numpy as np
 import math
 import glob
 import os
-import cv2 as cv2
+from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 from PIL import Image
 
 
 class MonetGAN:
-    def __init__(self, monet_path, photo_path, image_shape):
+    def __init__(self, monet_path, photo_path, image_shape, batch_size):
 
         # Load Datasets
         self.monet_path = monet_path
@@ -21,16 +21,19 @@ class MonetGAN:
         self.photos = glob.glob(self.photo_path)
         self.num_monets = len(self.monets)
         self.num_photos = len(self.photos)
+        self.batch_size = batch_size
 
         # Data shape
         self.image_shape = image_shape
 
         # Instantiate models
-        self.generator = Generator(self. monets, self.photos, self.image_shape)
+        self.generator = Generator(self. monets, self.photos, self.image_shape, self.batch_size)
         self.generator.build()
         self.generator.model.compile(loss='binary_crossentropy')
 
-        self.discriminator = Discriminator(self. monets, self.photos, self.image_shape)
+        print('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-='*3)
+
+        self.discriminator = Discriminator(self. monets, self.photos, self.image_shape, self.batch_size)
         self.discriminator.build()
         self.discriminator.model.compile(loss='binary_crossentropy')
 
@@ -42,17 +45,22 @@ class MonetGAN:
         self.discriminator.model.save_weights(path+'discriminator')
 
     def display_image(self, image, save=False, save_path='./SavedOutput/img.png'):
-        img = Image.fromarray(image)
+        img = Image.fromarray(image, 'RGB')
         if save:
             img.save(save_path)
         img.show()
+
+    def load_image(self, path):
+        i = Image.open(path)
+        x = np.asarray(i, dtype='float32')
+        return x
 
     # Function to load the nth monet painting (cycles if n >= len(monets))
     def load_monet(self, index):
         if index >= self.num_monets:
             index = index % self.num_monets
 
-        monet = np.asarray(Image.open(self.monets[index]), dtype='float32')
+        monet = self.load_image(self.monets[index])
         return monet
 
     # Function to load the nth photo (cycles if n >= len(photos))
@@ -60,7 +68,7 @@ class MonetGAN:
         if index >= self.num_photos:
             index = index % self.num_photos
 
-        photo = np.asarray(Image.open(self.photos[index]), dtype='float32')
+        photo = self.load_image(self.photos[index])
         return photo
 
     # THE training loop:
@@ -69,17 +77,17 @@ class MonetGAN:
     # 3) Grade the discriminator on how well it identified Monets and grade the Generator on how well it tricked the
     #    discriminator
     # 4) Back-propagate and repeat until we've gone through all the "steps" (parameter)
-    def train(self, steps, batch_size=32):
+    def train(self, steps):
 
-        valid = np.ones(batch_size)
+        valid = np.ones(self.batch_size)
 
         # Training loop
         for step in range(steps):
 
             # Determine proportion of batch that will be real vs. fake and from where in Monets we will sample
             index = np.random.randint(0, self.num_monets)
-            num_fake_images = math.floor(np.random.random()*batch_size)
-            num_real_images = batch_size - num_fake_images
+            num_fake_images = math.floor(np.random.random()*self.batch_size)
+            num_real_images = self.batch_size - num_fake_images
 
             # Create the training batch
             discriminator_train, generator_train = [], []
